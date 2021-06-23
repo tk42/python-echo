@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  protoc: 
+    image: ghcr.io/tk42/protoc
+    volumes: 
+      - .:/tmp
+    working_dir: "/tmp"
+    # command: ["python3", "-m", "grpc_tools.protoc", "--python_out=./python", "--grpc_python_out=./python", "-I./proto", "./proto/helloworld.proto"]
+    command: ["python3", "-m", "grpc_tools.protoc", "--python_out=./proto/autogen", "--grpc_python_out=./proto/autogen", "-I./proto", "./proto/helloworld.proto"]
+
+
+  server:
+    build: .
+    command: python3 /usr/app/server.py
+    volumes:
+        - ./server.py:/usr/app/server.py:ro
+        - ./proto/autogen:/usr/app/autogen
+
+  client: 
+    build: .
+    command: python3 /usr/app/client.py
+    volumes:
+        - ./client.py:/usr/app/client.py:ro
+        - ./proto/autogen:/usr/app/autogen
+    depends_on: 
+        - server
